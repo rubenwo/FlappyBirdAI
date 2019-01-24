@@ -30,4 +30,8 @@ public class Bird implements IDrawable {
         g2d.setColor(Color.WHITE);
         g2d.fill(new Ellipse2D.Float(position.getX(), position.getY(), 50, 50));
     }
+
+    public Vector2D getPosition() {
+        return position;
+    }
 }

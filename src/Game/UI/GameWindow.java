@@ -29,7 +29,7 @@ public class GameWindow extends JPanel implements KeyListener {
         height = 720;
         generateFrame();
         drawables = new ArrayList<>();
-        gravity = new Vector2D(0f, 0.1f);
+        gravity = new Vector2D(0f, 0.2f);
         bird = new Bird(new Vector2D(width / 4, height / 2));
         drawables.add(bird);
 
@@ -39,6 +39,10 @@ public class GameWindow extends JPanel implements KeyListener {
         gameLoop = new Timer(1000 / Constants.TARGET_FPS, event -> {
             bird.applyForce(gravity);
             drawables.forEach(IDrawable::update);
+            if (bird.getPosition().getY() < 0 || bird.getPosition().getY() > height - 50) {
+                drawLoop.stop();
+                gameLoop.stop();
+            }
         });
         drawLoop.start();
         gameLoop.start();
@@ -90,7 +94,7 @@ public class GameWindow extends JPanel implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-            bird.applyForce(new Vector2D(0, -2));
+            bird.applyForce(new Vector2D(0, -3));
         }
     }
 
