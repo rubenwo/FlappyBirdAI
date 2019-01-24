@@ -33,10 +33,10 @@ public class GameWindow extends JPanel implements KeyListener {
         bird = new Bird(new Vector2D(width / 4, height / 2));
         drawables.add(bird);
 
-        drawLoop = new Timer(1000 / Constants.TARGET_FPS, event -> {
+        drawLoop = new Timer(1000 / GameConstants.TARGET_FPS, event -> {
             repaint();
         });
-        gameLoop = new Timer(1000 / Constants.TARGET_FPS, event -> {
+        gameLoop = new Timer(1000 / GameConstants.TARGET_FPS, event -> {
             bird.applyForce(gravity);
             drawables.forEach(IDrawable::update);
             if (bird.getPosition().getY() < 0 || bird.getPosition().getY() > height - 50) {
