@@ -1,9 +1,12 @@
 package Game.Models;
 
+import NN.NeuralNetwork;
+
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 
 public class Bird implements IDrawable {
+    private NeuralNetwork brain;
     private Vector2D position;
     private Vector2D velocity;
     private Vector2D acceleration;
@@ -14,6 +17,24 @@ public class Bird implements IDrawable {
         this.velocity = new Vector2D(0, 0);
         this.acceleration = new Vector2D(0, 0);
         this.size = 50;
+        this.brain = new NeuralNetwork(5, 8, 2);
+
+    }
+
+    public Bird(Vector2D position, NeuralNetwork brain) {
+        this.position = position;
+        this.velocity = new Vector2D(0, 0);
+        this.acceleration = new Vector2D(0, 0);
+        this.size = 50;
+        this.brain = brain.copy();
+        this.brain.mutate((float e, int i, int j) -> {
+            if (Math.random() < 0.1) {
+                float offset = (float) (Math.random() * 0.5);
+                return e + offset;
+            } else {
+                return e;
+            }
+        });
     }
 
     public void applyForce(Vector2D force) {
