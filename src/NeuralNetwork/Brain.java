@@ -1,4 +1,4 @@
-package AI;
+package NeuralNetwork;
 
 public class Brain {
     public Brain() {

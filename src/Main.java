@@ -1,4 +1,4 @@
-import AI.Brain;
+import NeuralNetwork.Brain;
 import Game.UI.GameWindow;
 import Net.Connection;
 

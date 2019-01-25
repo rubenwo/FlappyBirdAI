@@ -3,6 +3,7 @@ package Game.UI;
 
 import Game.Models.Bird;
 import Game.Models.IDrawable;
+import Game.Models.Pipe;
 import Game.Models.Vector2D;
 
 import javax.swing.*;
@@ -14,38 +15,65 @@ import java.util.ArrayList;
 
 public class GameWindow extends JPanel implements KeyListener {
     private int width, height;
-    private ArrayList<IDrawable> drawables;
     private Timer drawLoop;
     private Timer gameLoop;
 
     private Vector2D gravity;
 
     private Bird bird;
+    private ArrayList<Pipe> pipes;
+
+
     private long deltaTime, startTime, endTime;
     private String lastFPS = "FPS: ";
+
+    private int score, counter, gap;
+
 
     public GameWindow() {
         width = 1280;
         height = 720;
         generateFrame();
-        drawables = new ArrayList<>();
+        pipes = new ArrayList<>();
+        gap = 200;
         gravity = new Vector2D(0f, 0.2f);
         bird = new Bird(new Vector2D(width / 4, height / 2));
-        drawables.add(bird);
 
         drawLoop = new Timer(1000 / GameConstants.TARGET_FPS, event -> {
             repaint();
         });
-        gameLoop = new Timer(1000 / GameConstants.TARGET_FPS, event -> {
+        gameLoop = new Timer(1000 / (GameConstants.TARGET_FPS), event -> {
+            score++;
+            counter++;
             bird.applyForce(gravity);
-            drawables.forEach(IDrawable::update);
-            if (bird.getPosition().getY() < 0 || bird.getPosition().getY() > height - 50) {
-                drawLoop.stop();
-                gameLoop.stop();
+            bird.update();
+            getPipes().forEach(IDrawable::update);
+
+            if (counter > 60) {
+                int topSize = (int) (Math.random() * (height / 2));
+                System.out.println(topSize);
+                int bottomSize = height - topSize - gap;
+                pipes.add(new Pipe(true, width, height, topSize));
+                pipes.add(new Pipe(false, width, height, bottomSize));
+                counter = 0;
             }
+            if (bird.getPosition().getY() < 0 || bird.getPosition().getY() > height - 50) {
+                onGameEnded();
+            }
+            for (Pipe pipe : pipes) {
+                if (bird.hasCollision(pipe)) {
+                    onGameEnded();
+                    break;
+                }
+            }
+            getPipes().removeIf(pipe -> pipe.getPosition().getX() < -(width / 10));
         });
         drawLoop.start();
         gameLoop.start();
+    }
+
+    private synchronized ArrayList<Pipe> getPipes() {
+        return this.pipes;
     }
 
     private void generateFrame() {
@@ -61,6 +89,12 @@ public class GameWindow extends JPanel implements KeyListener {
         frame.setVisible(true);
     }
 
+    private void onGameEnded() {
+        drawLoop.stop();
+        gameLoop.stop();
+        System.out.println("You're dead. Score: " + score);
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -68,9 +102,11 @@ public class GameWindow extends JPanel implements KeyListener {
         g2d.setColor(Color.BLACK);
         g2d.fill(new Rectangle2D.Double(0, 0, getWidth(), getHeight()));
 
-        drawables.forEach(d -> d.draw(g2d));
+        bird.draw(g2d);
+        getPipes().forEach(p -> p.draw(g2d));
 
-        drawFPS(g2d);
+        //drawFPS(g2d);
+        drawScore(g2d);
     }
 
     private void drawFPS(Graphics2D g2d) {
@@ -85,6 +121,13 @@ public class GameWindow extends JPanel implements KeyListener {
         g2d.setColor(Color.WHITE);
         g2d.setFont(new Font(g2d.getFont().getFontName(), Font.PLAIN, 20));
         g2d.drawString(fps, 0, 20);
+    }
+
+    private void drawScore(Graphics2D g2d) {
+        String score = "Score: " + this.score;
+        g2d.setColor(Color.WHITE);
+        g2d.setFont(new Font(g2d.getFont().getFontName(), Font.PLAIN, 20));
+        g2d.drawString(score, 0, 20);
     }
 
     @Override

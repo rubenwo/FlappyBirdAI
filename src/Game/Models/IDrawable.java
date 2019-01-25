@@ -6,4 +6,6 @@ public interface IDrawable {
     void update();
 
     void draw(Graphics2D g2d);
+
+    Vector2D getPosition();
 }
