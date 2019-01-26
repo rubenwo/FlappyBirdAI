@@ -23,6 +23,13 @@ public class Bird implements IDrawable {
         this.size = 50;
         if (brain != null) {
             this.brain = brain;
+            this.brain.mutate(((e, i, j) -> {
+                if (Math.random() < 0.2) {
+                    float offset = (float) (Math.random() * 1);
+                    return e + offset;
+                } else
+                    return e;
+            }));
         } else {
             this.brain = new NeuralNetwork(neuron_inputs, 8, 2);
         }

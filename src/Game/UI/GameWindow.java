@@ -34,7 +34,7 @@ public class GameWindow extends JPanel implements KeyListener {
         width = 1280;
         height = 720;
         gap = 200;
-        in_training = 500;
+        in_training = 50;
         pipes = new ArrayList<>();
         birds = new ArrayList<>();
         savedBirds = new ArrayList<>();
