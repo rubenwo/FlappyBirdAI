@@ -25,7 +25,7 @@ public class Bird implements IDrawable {
             this.brain = brain;
             this.brain.mutate(((e, i, j) -> {
                 if (Math.random() < 0.2) {
-                    float offset = (float) (Math.random() * 1);
+                    float offset = (float) (Math.random() * .5);
                     return e + offset;
                 } else
                     return e;
