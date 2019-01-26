@@ -12,6 +12,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
 
 public class GameWindow extends JPanel implements KeyListener {
     private int width, height;
@@ -42,30 +43,35 @@ public class GameWindow extends JPanel implements KeyListener {
         drawLoop = new Timer(1000 / GameConstants.TARGET_FPS, event -> {
             repaint();
         });
-        gameLoop = new Timer(1000 / (GameConstants.TARGET_FPS), event -> {
+        gameLoop = new Timer(1000 / (GameConstants.TARGET_FPS / 4), event -> {
             score++;
             counter++;
-            bird.applyForce(gravity);
-            bird.update();
-            getPipes().forEach(IDrawable::update);
+            CompletableFuture.runAsync(() -> {
+                bird.applyForce(gravity);
+                bird.update();
+                getPipes().forEach(IDrawable::update);
+            });
+
 
             if (counter > 60) {
                 int topSize = (int) (Math.random() * (height / 2));
-                System.out.println(topSize);
                 int bottomSize = height - topSize - gap;
                 pipes.add(new Pipe(true, width, height, topSize));
                 pipes.add(new Pipe(false, width, height, bottomSize));
                 counter = 0;
             }
-            if (bird.getPosition().getY() < 0 || bird.getPosition().getY() > height - 50) {
-                onGameEnded();
-            }
-            for (Pipe pipe : pipes) {
-                if (bird.hasCollision(pipe)) {
+            CompletableFuture.runAsync(() -> {
+                if (bird.getPosition().getY() < 0 || bird.getPosition().getY() > height - 50) {
                     onGameEnded();
-                    break;
                 }
-            }
+                for (Pipe pipe : pipes) {
+                    if (bird.hasCollision(pipe)) {
+                        onGameEnded();
+                        break;
+                    }
+                }
+            });
+
             getPipes().removeIf(pipe -> pipe.getPosition().getX() < -(width / 10));
         });
         drawLoop.start();
@@ -105,7 +111,7 @@ public class GameWindow extends JPanel implements KeyListener {
         bird.draw(g2d);
         getPipes().forEach(p -> p.draw(g2d));
 
-        //drawFPS(g2d);
+        drawFPS(g2d);
         drawScore(g2d);
     }
 
@@ -120,7 +126,7 @@ public class GameWindow extends JPanel implements KeyListener {
         lastFPS = fps;
         g2d.setColor(Color.WHITE);
         g2d.setFont(new Font(g2d.getFont().getFontName(), Font.PLAIN, 20));
-        g2d.drawString(fps, 0, 20);
+        g2d.drawString(fps, 0, height - 50);
     }
 
     private void drawScore(Graphics2D g2d) {
