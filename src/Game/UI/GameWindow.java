@@ -26,7 +26,6 @@ public class GameWindow extends JPanel implements KeyListener {
 
 
     private long deltaTime, startTime, endTime;
-    private String lastFPS = "FPS: ";
 
     private int score, counter, gap;
 
@@ -34,16 +33,17 @@ public class GameWindow extends JPanel implements KeyListener {
     public GameWindow() {
         width = 1280;
         height = 720;
+        bird = new Bird(null);
+
         generateFrame();
         pipes = new ArrayList<>();
         gap = 200;
         gravity = new Vector2D(0f, 0.2f);
-        bird = new Bird(new Vector2D(width / 4, height / 2));
 
         drawLoop = new Timer(1000 / GameConstants.TARGET_FPS, event -> {
             repaint();
         });
-        gameLoop = new Timer(1000 / (GameConstants.TARGET_FPS / 4), event -> {
+        gameLoop = new Timer(1000 / (GameConstants.TARGET_FPS), event -> {
             score++;
             counter++;
             CompletableFuture.runAsync(() -> {
@@ -123,7 +123,7 @@ public class GameWindow extends JPanel implements KeyListener {
         String fps = "FPS: ";
         if (deltaTime > 0)
             fps += Double.toString(1000 / deltaTime);
-        lastFPS = fps;
+        //lastFPS = fps;
         g2d.setColor(Color.WHITE);
         g2d.setFont(new Font(g2d.getFont().getFontName(), Font.PLAIN, 20));
         g2d.drawString(fps, 0, height - 50);
@@ -143,7 +143,7 @@ public class GameWindow extends JPanel implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-            bird.applyForce(new Vector2D(0, -3));
+            bird.up();
         }
     }
 

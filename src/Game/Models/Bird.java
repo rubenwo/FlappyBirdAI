@@ -1,6 +1,8 @@
 package Game.Models;
 
+import Game.UI.GameConstants;
 import NN.NeuralNetwork;
+import com.sun.istack.internal.Nullable;
 
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
@@ -10,31 +12,33 @@ public class Bird implements IDrawable {
     private Vector2D position;
     private Vector2D velocity;
     private Vector2D acceleration;
-    private int size;
+    private int size, score, fitness;
 
-    public Bird(Vector2D position) {
-        this.position = position;
+    public Bird(@Nullable NeuralNetwork brain) {
+
+        this.position = new Vector2D(GameConstants.WIDTH / 4f, GameConstants.HEIGHT / 2f);
+        //   this.position = position;
         this.velocity = new Vector2D(0, 0);
         this.acceleration = new Vector2D(0, 0);
         this.size = 50;
-        this.brain = new NeuralNetwork(5, 8, 2);
-
+        if (brain != null) {
+            this.brain.mutate((float e, int i, int j) -> {
+                if (Math.random() < 0.1) {
+                    float offset = (float) (Math.random() * 0.5);
+                    return e + offset;
+                } else {
+                    return e;
+                }
+            });
+        } else {
+            this.brain = new NeuralNetwork(5, 8, 2);
+        }
+        this.score = 0;
+        this.fitness = 0;
     }
 
-    public Bird(Vector2D position, NeuralNetwork brain) {
-        this.position = position;
-        this.velocity = new Vector2D(0, 0);
-        this.acceleration = new Vector2D(0, 0);
-        this.size = 50;
-        this.brain = brain.copy();
-        this.brain.mutate((float e, int i, int j) -> {
-            if (Math.random() < 0.1) {
-                float offset = (float) (Math.random() * 0.5);
-                return e + offset;
-            } else {
-                return e;
-            }
-        });
+    public Bird copy() {
+        return new Bird(this.brain);
     }
 
     public void applyForce(Vector2D force) {
@@ -46,6 +50,10 @@ public class Bird implements IDrawable {
         position.add(velocity);
         velocity.add(acceleration);
         acceleration.mult(0);
+    }
+
+    public void up() {
+        this.applyForce(new Vector2D(0, -3));
     }
 
     public boolean hasCollision(Pipe pipe) {
